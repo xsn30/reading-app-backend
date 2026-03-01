@@ -1,0 +1,99 @@
+### 创建一个新作业
+POST http://localhost:8080/assignments
+Content-Type: application/json
+
+{
+  "title": "阅读《三国演义》第1回并完成练习题",
+  "bookTitle": "三国演义",
+  "chapter": "第1回 宴桃园豪杰三结义",
+  "dueDate": "2026-03-10"
+}
+
+### 给作业 1 新增一道题
+POST http://localhost:8080/assignments/1/questions
+Content-Type: application/json
+
+{
+  "type": "MCQ",
+  "text": "这一章中，孙悟空最后成了什么角色？",
+  "options": [
+    "A. 天兵",
+    "B. 猴王",
+    "C. 龙王",
+    "D. 神仙"
+  ],
+  "correctAnswer": "B"
+}
+
+### 学生提交作业 1 的答案
+POST http://localhost:8080/assignments/1/submit
+Content-Type: application/json
+
+{
+  "answers": [
+    { "questionId": 1, "answer": "A" },
+    { "questionId": 2, "answer": "这章主要讲的是石猴出生并成为猴王的过程" },
+    { "questionId": 5, "answer": "B" }
+  ]
+}
+
+### 1. 不带分页参数，直接查全部作业
+GET http://localhost:8080/assignments
+{
+  "content": [
+    {
+      "id": 1,
+      "title": "...",
+      "bookTitle": "西游记",
+      "chapter": "...",
+      "dueDate": "2026-03-01"
+    },
+    {
+      "id": 2,
+      "title": "...",
+      "bookTitle": "哈利·波特与魔法石",
+      "chapter": "...",
+      "dueDate": "2026-03-05"
+    }
+  ],
+  "totalElements": 2,
+  "totalPages": 1,
+  "number": 0,
+  "size": 10
+}
+### 2. 每页 1 条，第一页（page 从 0 开始）
+GET http://localhost:8080/assignments?page=0&size=1
+
+### 3. 每页 1 条，第二页
+GET http://localhost:8080/assignments?page=1&size=1
+
+### 4. 按书名模糊筛选（比如只看“西游”）
+GET http://localhost:8080/assignments?bookTitle=西游
+
+### A1. 老师创建一个新作业（三国演义）
+POST http://localhost:8080/assignments
+Content-Type: application/json
+
+{
+  "title": "阅读《三国演义》第1回并完成练习题",
+  "bookTitle": "三国演义",
+  "chapter": "第1回 宴桃园豪杰三结义",
+  "dueDate": "2026-03-10"
+}
+
+### A2. 查询全部作业，确认新作业出现了
+GET http://localhost:8080/assignments
+
+### A3. 修改作业 6
+PUT http://localhost:8080/assignments/6
+Content-Type: application/json
+
+{
+  "title": "【修改后】阅读《三国演义》第1回并完成练习题",
+  "bookTitle": "三国演义",
+  "chapter": "第1回 宴桃园豪杰三结义",
+  "dueDate": "2026-03-15"
+}
+
+### D1. 删除多余的三国演义作业（举例）
+DELETE http://localhost:8080/assignments/3
