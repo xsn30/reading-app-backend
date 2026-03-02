@@ -97,3 +97,47 @@ Content-Type: application/json
 
 ### D1. 删除多余的三国演义作业（举例）
 DELETE http://localhost:8080/assignments/3
+
+### 把作业 1 的第 1 题分值改成 2 分
+PUT http://localhost:8080/questions/1
+Content-Type: application/json
+
+{
+  "assignmentId": 1,
+  "type": "MCQ",
+  "text": "孙悟空是从哪里出生的？",
+  "options": [
+    "A. 花果山的一块石头",
+    "B. 东海龙宫",
+    "C. 天庭",
+    "D. 西天极乐世界"
+  ],
+  "correctAnswer": "A",
+  "score": 2,
+  "difficulty": "EASY"
+}
+
+### 把作业 1 的第 2 题分值改成 3 分
+PUT http://localhost:8080/questions/2
+Content-Type: application/json
+
+{
+  "assignmentId": 1,
+  "type": "SHORT",
+  "text": "用一句话概括这一章的主要内容。",
+  "options": [],
+  "correctAnswer": "这章主要讲的是石猴出生并成为猴王的过程",
+  "score": 3,
+  "difficulty": "MEDIUM"
+}
+
+### 学生提交作业 1 的答案（全对）
+POST http://localhost:8080/assignments/1/submit
+Content-Type: application/json
+
+{
+  "answers": [
+    { "questionId": 1, "answer": "A" },
+    { "questionId": 2, "answer": "这章主要讲的是石猴出生并成为猴王的过程" }
+  ]
+}

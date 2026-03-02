@@ -91,7 +91,8 @@ public class QuestionService {
                     existing.setText(updated.getText());
                     existing.setOptions(updated.getOptions());
                     existing.setCorrectAnswer(updated.getCorrectAnswer());
-                    // 等下我们会加 score / difficulty，这里一起 set
+                    existing.setScore(updated.getScore());
+                    existing.setDifficulty(updated.getDifficulty());
                     return questionRepository.save(existing);
                 })
                 .orElse(null);

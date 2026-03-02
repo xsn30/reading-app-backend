@@ -13,9 +13,11 @@ import java.util.List;
 public class SubmissionService {
 
     private final QuestionService questionService;
+    private final ShortAnswerGrader shortAnswerGrader;
 
-    public SubmissionService(QuestionService questionService) {
+    public SubmissionService(QuestionService questionService,ShortAnswerGrader shortAnswerGrader) {
         this.questionService = questionService;
+        this.shortAnswerGrader = shortAnswerGrader;
     }
 
     public SubmissionResult gradeAssignment(Long assignmentId, List<StudentAnswer> answers) {
@@ -37,13 +39,23 @@ public class SubmissionService {
 
             Integer questionScore = question.getScore();
             int scoreMax = (questionScore != null ? questionScore : 1);
-
             maxScore += scoreMax;
 
             String correct = question.getCorrectAnswer();
-            boolean isCorrect = compareAnswers(correct, answerText, question.getType());
+            int scoreEarned;
+            boolean isCorrect;
 
-            int scoreEarned = isCorrect ? scoreMax : 0;
+            // —— 这里根据题型分流 ——
+            if ("MCQ".equalsIgnoreCase(question.getType())) {
+                // 选择题：沿用你原来的对比逻辑
+                isCorrect = compareAnswers(correct, answerText);
+                scoreEarned = isCorrect ? scoreMax : 0;
+            } else {
+                // 简答题 / 其他题型：交给 ShortAnswerGrader 处理
+                scoreEarned = shortAnswerGrader.grade(question, answerText);
+                isCorrect = (scoreEarned == scoreMax);  // 得到满分算“完全正确”
+            }
+
             totalScore += scoreEarned;
 
             QuestionResult qr = new QuestionResult(
@@ -56,25 +68,17 @@ public class SubmissionService {
             );
             results.add(qr);
         }
-
         return new SubmissionResult(assignmentId, totalScore, maxScore, results);
     }
 
     // 简单的对比逻辑：去掉前后空格，对大小写不敏感
-    private boolean compareAnswers(String correct, String given, String type) {
+    private boolean compareAnswers(String correct, String given) {
         if (correct == null || given == null) {
             return false;
         }
 
         String c = correct.trim();
         String g = given.trim();
-
-        // 选择题就简单用 equalsIgnoreCase
-        if ("MCQ".equalsIgnoreCase(type)) {
-            return c.equalsIgnoreCase(g);
-        }
-
-        // 简答题先用完全相等（以后可以换成 AI 或更复杂的算法）
-        return c.equals(g);
+        return c.equalsIgnoreCase(g);
     }
 }
