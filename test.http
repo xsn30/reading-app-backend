@@ -141,3 +141,15 @@ Content-Type: application/json
     { "questionId": 2, "answer": "这章主要讲的是石猴出生并成为猴王的过程" }
   ]
 }
+
+### 老师：查看作业1有哪些提交
+GET http://localhost:8080/teacher/assignments/1/submissions
+
+### 老师：查看 submissionId=1 的每题详情
+GET http://localhost:8080/teacher/submissions/1
+
+### 家长：查看 test-student 的提交记录
+GET http://localhost:8080/parent/students/test-student/submissions
+
+### 家长：查看 submission 1 的详情
+GET http://localhost:8080/parent/submissions/1

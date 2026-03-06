@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>作业详情</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 20px; }
+        .back-link { margin-bottom: 16px; display: inline-block; }
+        .question { border: 1px solid #ddd; padding: 12px; margin-bottom: 12px; border-radius: 4px; }
+        .question-type { font-size: 12px; color: #666; }
+        ul { margin: 8px 0 0 20px; }
+        textarea { width: 100%; min-height: 60px; }
+    </style>
+</head>
+<body>
+<a class="back-link" href="/assignments.html">← 返回作业列表</a>
+
+<h1 id="title">作业详情</h1>
+<p id="subtitle"></p>
+
+<div id="questionContainer">
+    <!-- JS 填充题目 -->
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const params = new URLSearchParams(window.location.search);
+        const assignmentId = params.get("id");
+
+        if (!assignmentId) {
+            document.getElementById("title").innerText = "缺少作业 ID";
+            document.getElementById("subtitle").innerText = "URL 里需要带上 ?id=xxx";
+            return;
+        }
+
+        document.getElementById("title").innerText = "作业 " + assignmentId + " 的题目";
+
+        loadQuestions(assignmentId);
+    });
+
+    function loadQuestions(assignmentId) {
+        fetch("/assignments/" + assignmentId + "/questions")
+            .then(resp => resp.json())
+            .then(list => {
+                const container = document.getElementById("questionContainer");
+                container.innerHTML = "";
+
+                if (!Array.isArray(list) || list.length === 0) {
+                    container.innerText = "这个作业暂时还没有题目。";
+                    return;
+                }
+
+                list.forEach((q, index) => {
+                    const div = document.createElement("div");
+                    div.className = "question";
+
+                    const typeLabel = (q.type === "MCQ" ? "选择题" : "简答题");
+                    const scoreLabel = (q.score != null ? `（${q.score} 分）` : "");
+
+                    let html = `
+            <div class="question-type">第 ${index + 1} 题 · ${typeLabel} ${scoreLabel}</div>
+            <div>${q.text}</div>
+          `;
+
+                    if (q.type === "MCQ" && Array.isArray(q.options)) {
+                        html += "<ul>";
+                        q.options.forEach(opt => {
+                            html += `<li>${opt}</li>`;
+                        });
+                        html += "</ul>";
+                    } else {
+                        html += `<div style="margin-top:8px;"><textarea placeholder="这里以后可以让学生作答，但现在先只展示题目"></textarea></div>`;
+                    }
+
+                    div.innerHTML = html;
+                    container.appendChild(div);
+                });
+            })
+            .catch(err => {
+                console.error("加载题目失败", err);
+                document.getElementById("questionContainer").innerText =
+                    "加载题目失败，请检查后端是否在运行。";
+            });
+    }
+</script>
+</body>
+</html>

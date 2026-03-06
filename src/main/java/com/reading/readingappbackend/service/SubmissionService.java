@@ -1,9 +1,8 @@
 package com.reading.readingappbackend.service;
 
-import com.reading.readingappbackend.model.Question;
-import com.reading.readingappbackend.model.QuestionResult;
-import com.reading.readingappbackend.model.StudentAnswer;
-import com.reading.readingappbackend.model.SubmissionResult;
+import com.reading.readingappbackend.model.*;
+import com.reading.readingappbackend.repository.SubmissionAnswerRepository;
+import com.reading.readingappbackend.repository.SubmissionRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,16 +12,25 @@ import java.util.List;
 public class SubmissionService {
 
     private final QuestionService questionService;
-    private final ShortAnswerGrader shortAnswerGrader;
+    // ✅ 把 ShortAnswerGrader 换成 AiGrader
+    private final AiGrader aiGrader;
+    private final SubmissionRepository submissionRepository;
+    private final SubmissionAnswerRepository submissionAnswerRepository;
 
-    public SubmissionService(QuestionService questionService,ShortAnswerGrader shortAnswerGrader) {
+    // 构造函数里也换成 AiGrader
+    public SubmissionService(QuestionService questionService, AiGrader aiGrader,
+                             SubmissionRepository submissionRepository,
+                             SubmissionAnswerRepository submissionAnswerRepository) {
         this.questionService = questionService;
-        this.shortAnswerGrader = shortAnswerGrader;
+        this.aiGrader = aiGrader;
+        this.submissionRepository = submissionRepository;
+        this.submissionAnswerRepository = submissionAnswerRepository;
     }
 
     public SubmissionResult gradeAssignment(Long assignmentId, List<StudentAnswer> answers) {
 
         List<QuestionResult> results = new ArrayList<>();
+        List<SubmissionAnswer> answerEntities = new ArrayList<>();
         int totalScore = 0;
         int maxScore = 0;
 
@@ -51,8 +59,8 @@ public class SubmissionService {
                 isCorrect = compareAnswers(correct, answerText);
                 scoreEarned = isCorrect ? scoreMax : 0;
             } else {
-                // 简答题 / 其他题型：交给 ShortAnswerGrader 处理
-                scoreEarned = shortAnswerGrader.grade(question, answerText);
+                // ✅ 简答题 / 其他题型：全部交给 AiGrader
+                scoreEarned = aiGrader.grade(question, answerText);
                 isCorrect = (scoreEarned == scoreMax);  // 得到满分算“完全正确”
             }
 
@@ -67,8 +75,38 @@ public class SubmissionService {
                     scoreMax
             );
             results.add(qr);
+            SubmissionAnswer sa = new SubmissionAnswer(
+                    null,          // submissionId 先留空
+                    questionId,
+                    answerText,
+                    correct,
+                    isCorrect,
+                    scoreEarned,
+                    scoreMax
+            );
+
+            answerEntities.add(sa);
         }
+
+        Submission submission = new Submission(
+                assignmentId,
+                "test-student",
+                totalScore,
+                maxScore
+        );
+
+        submissionRepository.save(submission);
+
+        for (SubmissionAnswer sa : answerEntities) {
+
+            sa.setSubmissionId(submission.getId());
+
+            submissionAnswerRepository.save(sa);
+        }
+
+// 👇 最后再 return
         return new SubmissionResult(assignmentId, totalScore, maxScore, results);
+
     }
 
     // 简单的对比逻辑：去掉前后空格，对大小写不敏感

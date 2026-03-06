@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>作业列表</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 16px; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background: #f5f5f5; }
+        button { padding: 4px 10px; cursor: pointer; }
+        .filter-bar { margin-top: 12px; }
+        .filter-bar input { padding: 4px 8px; }
+    </style>
+</head>
+<body>
+<h1>老师端 · 作业列表</h1>
+
+<div class="filter-bar">
+    <label>
+        按书名筛选：
+        <input type="text" id="bookTitleInput" placeholder="例如：西游">
+    </label>
+    <button id="filterBtn">搜索</button>
+    <button id="resetBtn">重置</button>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>标题</th>
+        <th>书名</th>
+        <th>章节</th>
+        <th>截止日期</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody id="assignmentTableBody">
+    <!-- 这里用 JS 填充 -->
+    </tbody>
+</table>
+
+<script>
+    // 载入页面时自动加载作业列表
+    document.addEventListener("DOMContentLoaded", () => {
+        loadAssignments();
+
+        document.getElementById("filterBtn").addEventListener("click", () => {
+            const keyword = document.getElementById("bookTitleInput").value.trim();
+            loadAssignments(keyword);
+        });
+
+        document.getElementById("resetBtn").addEventListener("click", () => {
+            document.getElementById("bookTitleInput").value = "";
+            loadAssignments();
+        });
+    });
+
+    function loadAssignments(bookTitleKeyword) {
+        // 基本 URL：带上 page / size
+        let url = "/assignments?page=0&size=50";
+
+        // 如果有书名关键字，就加上 bookTitle 参数
+        if (bookTitleKeyword && bookTitleKeyword.length > 0) {
+            url += "&bookTitle=" + encodeURIComponent(bookTitleKeyword);
+        }
+
+        fetch(url)
+            .then(resp => resp.json())
+            .then(data => {
+                const tbody = document.getElementById("assignmentTableBody");
+                tbody.innerHTML = ""; // 先清空
+
+                const list = data.content || [];
+                list.forEach(a => {
+                    const tr = document.createElement("tr");
+
+                    tr.innerHTML = `
+            <td>${a.id}</td>
+            <td>${a.title}</td>
+            <td>${a.bookTitle}</td>
+            <td>${a.chapter}</td>
+            <td>${a.dueDate}</td>
+            <td><button data-id="${a.id}">查看详情</button></td>
+          `;
+
+                    // 给按钮加点击事件：跳到 assignment.html?id=xxx
+                    tr.querySelector("button").addEventListener("click", () => {
+                        window.location.href = "/assignment.html?id=" + a.id;
+                    });
+
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(err => {
+                console.error("加载作业列表失败", err);
+                alert("加载作业列表失败，请检查后端是否在运行。");
+            });
+    }
+</script>
+</body>
+</html>
