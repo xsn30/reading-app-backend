@@ -5,6 +5,7 @@ import com.reading.readingappbackend.model.SubmissionAnswer;
 import com.reading.readingappbackend.repository.SubmissionAnswerRepository;
 import com.reading.readingappbackend.repository.SubmissionRepository;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 

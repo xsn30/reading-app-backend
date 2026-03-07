@@ -1,0 +1,33 @@
+### 注册学生
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "student2",
+  "password": "123456",
+  "role": "student"
+}
+
+
+### 注册家长
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "parent2",
+  "password": "123456",
+  "role": "parent",
+  "linkedStudentUsername": "student2"
+}
+
+
+### 登录家长
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "username": "parent2",
+  "password": "123456"
+}
+### 家长查看 student2 的提交记录
+GET http://localhost:8080/parent/students/student2/submissions

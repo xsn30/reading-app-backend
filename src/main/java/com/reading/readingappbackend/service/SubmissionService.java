@@ -27,7 +27,9 @@ public class SubmissionService {
         this.submissionAnswerRepository = submissionAnswerRepository;
     }
 
-    public SubmissionResult gradeAssignment(Long assignmentId, List<StudentAnswer> answers) {
+    public SubmissionResult gradeAssignment(Long assignmentId,
+                                            String studentName,
+                                            List<StudentAnswer> answers) {
 
         List<QuestionResult> results = new ArrayList<>();
         List<SubmissionAnswer> answerEntities = new ArrayList<>();
@@ -90,7 +92,7 @@ public class SubmissionService {
 
         Submission submission = new Submission(
                 assignmentId,
-                "test-student",
+                studentName,
                 totalScore,
                 maxScore
         );

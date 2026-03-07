@@ -60,7 +60,11 @@ public class AssignmentController {
     @PostMapping("/assignments/{id}/submit")
     public SubmissionResult submitAssignment(@PathVariable Long id,
                                              @RequestBody SubmissionRequest request) {
-        return submissionService.gradeAssignment(id, request.getAnswers());
+        return submissionService.gradeAssignment(
+                id,
+                request.getStudentName(),
+                request.getAnswers()
+        );
     }
 
     @PutMapping("/assignments/{id}")

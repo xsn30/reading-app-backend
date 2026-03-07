@@ -153,3 +153,69 @@ GET http://localhost:8080/parent/students/test-student/submissions
 
 ### 家长：查看 submission 1 的详情
 GET http://localhost:8080/parent/submissions/1
+
+
+### 注册学生
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "student1",
+  "password": "123456",
+  "role": "student"
+}
+
+### 注册老师
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "teacher1",
+  "password": "123456",
+  "role": "teacher"
+}
+
+### 注册家长
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "parent1",
+  "password": "123456",
+  "role": "parent"
+}
+
+### 登录学生
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "username": "student1",
+  "password": "123456"
+}
+
+### 登录老师
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "username": "teacher1",
+  "password": "123456"
+}
+### 登录家长
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "username": "parent200",
+  "password": "123456"
+}
+
+### 登录家长
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "username": "parent1",
+  "password": "123456"
+}
