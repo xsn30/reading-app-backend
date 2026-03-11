@@ -1,0 +1,106 @@
+### 注册班主任
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "teacher_demo_20",
+  "password": "123456",
+  "role": "teacher"
+}
+
+### 注册任课老师
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "teacher_demo_21",
+  "password": "123456",
+  "role": "teacher"
+}
+
+### 注册学生1
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "student_demo_20",
+  "password": "123456",
+  "role": "student"
+}
+
+### 注册学生2
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "student_demo_21",
+  "password": "123456",
+  "role": "student"
+}
+
+### 创建班级
+POST http://localhost:8080/classrooms
+Content-Type: application/json
+
+{
+  "name": "Class Demo 20",
+  "teacherUsername": "teacher_demo_20"
+}
+
+### 查看班主任的班级
+GET http://localhost:8080/classrooms/teacher/teacher_demo_20
+
+### 学生1加入班级
+POST http://localhost:8080/classrooms/1/join
+Content-Type: application/json
+
+{
+  "studentUsername": "student_demo_20"
+}
+
+### 学生2加入班级
+POST http://localhost:8080/classrooms/1/join
+Content-Type: application/json
+
+{
+  "studentUsername": "student_demo_21"
+}
+
+### 查看班级学生
+GET http://localhost:8080/classrooms/1/students
+
+### 班主任添加任课老师
+POST http://localhost:8080/classrooms/1/teachers
+Content-Type: application/json
+
+{
+  "homeroomTeacherUsername": "teacher_demo_20",
+  "teacherUsername": "teacher_demo_21"
+}
+
+### 查看班级老师
+GET http://localhost:8080/classrooms/1/teachers
+
+### 班主任移出学生
+POST http://localhost:8080/classrooms/1/remove-student
+Content-Type: application/json
+
+{
+  "homeroomTeacherUsername": "teacher_demo_20",
+  "studentUsername": "student_demo_20"
+}
+
+### 再次查看班级学生
+GET http://localhost:8080/classrooms/1/students
+
+### 学生查看自己的提交记录
+GET http://localhost:8080/student/submissions?studentUsername=xsn
+
+### 学生查看某次提交详情
+GET http://localhost:8080/student/submissions/1
+
+### 查看本班学生提交状态
+GET http://localhost:8080/teacher/assignments/1/submission-status?teacherUsername=teacher_demo_20
+
+### 家长查看孩子学习概览
+GET http://localhost:8080/parent/students/xsn/summary

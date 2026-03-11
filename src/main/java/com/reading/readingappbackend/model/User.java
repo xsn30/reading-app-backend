@@ -14,6 +14,7 @@ public class User {
     private String password;
     private String role;   // student / teacher / parent / school
     private String linkedStudentUsername;
+    private Long classroomId;
 
     public User() {
     }
@@ -59,5 +60,12 @@ public class User {
     }
     public void setLinkedStudentUsername(String linkedStudentUsername) {
         this.linkedStudentUsername = linkedStudentUsername;
+    }
+    public Long getClassroomId() {
+        return classroomId;
+    }
+
+    public void setClassroomId(Long classroomId) {
+        this.classroomId = classroomId;
     }
 }

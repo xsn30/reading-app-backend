@@ -31,3 +31,178 @@ Content-Type: application/json
 }
 ### 家长查看 student2 的提交记录
 GET http://localhost:8080/parent/students/student2/submissions
+
+### 注册老师
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "teacher_class_1",
+  "password": "123456",
+  "role": "teacher"
+}
+
+### 注册学生
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "student_class_1",
+  "password": "123456",
+  "role": "student"
+}
+
+### 老师创建班级
+POST http://localhost:8080/classrooms
+Content-Type: application/json
+
+{
+  "name": "Class A",
+  "teacherUsername": "teacher_class_1"
+}
+
+### 学生加入班级
+POST http://localhost:8080/classrooms/1/join
+Content-Type: application/json
+
+{
+  "studentUsername": "student_class_1"
+}
+
+### 老师查看自己的班级
+GET http://localhost:8080/classrooms/teacher/teacher_class_1
+
+### 查看班级学生
+GET http://localhost:8080/classrooms/1/students
+
+### 注册老师
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "teacher_class_2",
+  "password": "123456",
+  "role": "teacher"
+}
+
+### 班主任添加老师进班
+POST http://localhost:8080/classrooms/1/teachers
+Content-Type: application/json
+
+{
+  "homeroomTeacherUsername": "teacher_class_1",
+  "teacherUsername": "teacher_class_2"
+}
+
+### 查看班级老师
+GET http://localhost:8080/classrooms/1/teachers
+
+### 班主任移出学生
+POST http://localhost:8080/classrooms/1/remove-student
+Content-Type: application/json
+
+{
+  "homeroomTeacherUsername": "teacher_class_1",
+  "studentUsername": "student_class_1"
+}
+
+### 查看班级学生
+GET http://localhost:8080/classrooms/1/students
+
+### 学生加入班级
+POST http://localhost:8080/classrooms/1/join
+Content-Type: application/json
+
+{
+  "studentUsername": "student_class_1"
+}
+### 查看班级学生
+GET http://localhost:8080/classrooms/1/students
+
+### 班主任移出学生
+POST http://localhost:8080/classrooms/1/remove-student
+Content-Type: application/json
+
+### 查看班级老师
+GET http://localhost:8080/classrooms/1/teachers
+
+
+### 注册班主任
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "teacher_demo_1",
+  "password": "123456",
+  "role": "teacher"
+}
+
+### 注册任课老师
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "teacher_demo_2",
+  "password": "123456",
+  "role": "teacher"
+}
+
+### 注册学生1
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "student_demo_1",
+  "password": "123456",
+  "role": "student"
+}
+
+### 注册学生2
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "student_demo_2",
+  "password": "123456",
+  "role": "student"
+}
+
+### 创建班级
+POST http://localhost:8080/classrooms
+Content-Type: application/json
+
+{
+  "name": "Class Demo B",
+  "teacherUsername": "teacher_demo_1"
+}
+### 查看班主任的班级
+GET http://localhost:8080/classrooms/teacher/teacher_demo_1
+
+### 学生1加入班级
+POST http://localhost:8080/classrooms/2/join
+Content-Type: application/json
+
+{
+  "studentUsername": "student_demo_1"
+}
+
+### 学生2加入班级
+POST http://localhost:8080/classrooms/2/join
+Content-Type: application/json
+
+{
+  "studentUsername": "student_demo_2"
+}
+
+### 查看班级学生
+GET http://localhost:8080/classrooms/2/students
+
+### 班主任添加任课老师
+POST http://localhost:8080/classrooms/4/teachers
+Content-Type: application/json
+
+{
+  "homeroomTeacherUsername": "teacher_demo_1",
+  "teacherUsername": "teacher_demo_2"
+}
+
