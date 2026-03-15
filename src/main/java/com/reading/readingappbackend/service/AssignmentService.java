@@ -2,78 +2,81 @@ package com.reading.readingappbackend.service;
 
 import com.reading.readingappbackend.model.Assignment;
 import com.reading.readingappbackend.repository.AssignmentRepository;
-import jakarta.annotation.PostConstruct;
-import org.springframework.stereotype.Service;
 import com.reading.readingappbackend.repository.QuestionRepository;
-
-
-import java.time.LocalDate;
-import java.util.List;
+import jakarta.annotation.PostConstruct;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import com.reading.readingappbackend.model.Submission;
+import com.reading.readingappbackend.repository.SubmissionAnswerRepository;
+import com.reading.readingappbackend.repository.SubmissionRepository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class AssignmentService {
 
     private final AssignmentRepository assignmentRepository;
     private final QuestionRepository questionRepository;
+    private final SubmissionRepository submissionRepository;
+    private final SubmissionAnswerRepository submissionAnswerRepository;
 
-
-    public AssignmentService(AssignmentRepository assignmentRepository,QuestionRepository questionRepository) {
+    public AssignmentService(AssignmentRepository assignmentRepository,
+                             QuestionRepository questionRepository,
+                             SubmissionRepository submissionRepository,
+                             SubmissionAnswerRepository submissionAnswerRepository) {
         this.assignmentRepository = assignmentRepository;
         this.questionRepository = questionRepository;
+        this.submissionRepository = submissionRepository;
+        this.submissionAnswerRepository = submissionAnswerRepository;
     }
 
-    // ⭐ 启动时初始化两条假数据（只有在表里没数据时才插入）
+    // 暂时不初始化默认作业
+    // 作业将由老师通过接口创建
     @PostConstruct
     public void initData() {
-        if (assignmentRepository.count() == 0) {
-            Assignment a1 = new Assignment(
-                    "阅读《西游记》第1章并完成练习题",
-                    "西游记",
-                    "第1章 石猴出世",
-                    LocalDate.of(2026, 3, 1)
-            );
-
-            Assignment a2 = new Assignment(
-                    "阅读《哈利·波特》第一章并回答问题",
-                    "哈利·波特与魔法石",
-                    "Chapter 1: The Boy Who Lived",
-                    LocalDate.of(2026, 3, 5)
-            );
-
-            assignmentRepository.save(a1);
-            assignmentRepository.save(a2);
-        }
     }
 
-    // ✅ 查询全部作业：从数据库里查
+    // 查询全部作业
     public List<Assignment> getAllAssignments() {
         return assignmentRepository.findAll();
     }
 
-    // ✅ 根据 id 查作业：从数据库里查
+    // 根据 id 查作业
     public Assignment getAssignmentById(Long id) {
         return assignmentRepository.findById(id).orElse(null);
     }
 
-    // ✅ 创建新作业：保存到数据库
+    // 创建新作业
     public Assignment createAssignment(Assignment assignment) {
-        // 不需要再自己 setId，自增交给数据库/JPA
         return assignmentRepository.save(assignment);
     }
+
+    // 分页查询作业（保留原来的搜索逻辑）
     public Page<Assignment> getAssignmentsPage(String bookTitleFilter, Pageable pageable) {
         if (bookTitleFilter != null && !bookTitleFilter.isBlank()) {
             return assignmentRepository.findByBookTitleContainingIgnoreCase(bookTitleFilter, pageable);
         } else {
             return assignmentRepository.findAll(pageable);
         }
-
     }
+
+    // 删除作业
+    @Transactional
     public void deleteAssignment(Long id) {
+        List<Submission> submissions = submissionRepository.findByAssignmentId(id);
+
+        for (Submission submission : submissions) {
+            submissionAnswerRepository.deleteBySubmissionId(submission.getId());
+        }
+
+        submissionRepository.deleteByAssignmentId(id);
         questionRepository.deleteByAssignmentId(id);
         assignmentRepository.deleteById(id);
     }
+
+    // 更新作业
     public Assignment updateAssignment(Long id, Assignment updated) {
         return assignmentRepository.findById(id)
                 .map(existing -> {
@@ -81,6 +84,7 @@ public class AssignmentService {
                     existing.setBookTitle(updated.getBookTitle());
                     existing.setChapter(updated.getChapter());
                     existing.setDueDate(updated.getDueDate());
+                    existing.setClassroomId(updated.getClassroomId());
                     return assignmentRepository.save(existing);
                 })
                 .orElse(null);

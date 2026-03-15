@@ -40,26 +40,8 @@ public class AuthController {
             return Map.of("error", "用户名已存在");
         }
 
-        String linkedStudentUsername = request.getLinkedStudentUsername();
-
-        if ("parent".equals(request.getRole())) {
-
-            if (linkedStudentUsername == null || linkedStudentUsername.isBlank()) {
-                return Map.of("error", "家长注册时必须填写孩子用户名");
-            }
-
-            Optional<User> studentOptional = userRepository.findByUsername(linkedStudentUsername);
-
-            if (studentOptional.isEmpty()) {
-                return Map.of("error", "绑定失败：学生账号不存在");
-            }
-
-            User studentUser = studentOptional.get();
-
-            if (!"student".equals(studentUser.getRole())) {
-                return Map.of("error", "绑定失败：该账号不是学生");
-            }
-        }
+        // 先保留旧字段，但不再强制家长注册时必须绑定孩子
+        String linkedStudentUsername = null;
 
         User user = new User(
                 request.getUsername(),

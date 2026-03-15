@@ -15,10 +15,15 @@ import com.reading.readingappbackend.model.User;
 import com.reading.readingappbackend.repository.ClassroomRepository;
 import com.reading.readingappbackend.repository.UserRepository;
 import com.reading.readingappbackend.model.StudentSubmissionStatus;
+import com.reading.readingappbackend.model.ClassroomTeacher;
+import com.reading.readingappbackend.model.CreateTeacherAssignmentRequest;
+import com.reading.readingappbackend.repository.ClassroomTeacherRepository;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,19 +38,22 @@ public class TeacherController {
     private final QuestionRepository questionRepository;
     private final ClassroomRepository classroomRepository;
     private final UserRepository userRepository;
+    private final ClassroomTeacherRepository classroomTeacherRepository;
 
     public TeacherController(SubmissionRepository submissionRepository,
                              SubmissionAnswerRepository submissionAnswerRepository,
                              AssignmentRepository assignmentRepository,
                              QuestionRepository questionRepository,
                              ClassroomRepository classroomRepository,
-                             UserRepository userRepository) {
+                             UserRepository userRepository,
+                             ClassroomTeacherRepository classroomTeacherRepository) {
         this.submissionRepository = submissionRepository;
         this.submissionAnswerRepository = submissionAnswerRepository;
         this.assignmentRepository = assignmentRepository;
         this.questionRepository = questionRepository;
         this.classroomRepository = classroomRepository;
         this.userRepository = userRepository;
+        this.classroomTeacherRepository = classroomTeacherRepository;
     }
 
     @GetMapping("/assignments/{assignmentId}/submissions")
@@ -84,25 +92,40 @@ public class TeacherController {
     public List<StudentSubmissionStatus> getSubmissionStatus(@PathVariable Long assignmentId,
                                                              @RequestParam String teacherUsername) {
 
-        // 1. 先找到这个老师创建的所有班级
-        List<Classroom> classrooms = classroomRepository.findByTeacherUsername(teacherUsername);
+        Optional<Assignment> assignmentOptional = assignmentRepository.findById(assignmentId);
 
-        // 2. 找到这些班级里的所有学生
-        List<User> students = new ArrayList<>();
-        for (Classroom classroom : classrooms) {
-            students.addAll(userRepository.findByClassroomId(classroom.getId()));
+        if (assignmentOptional.isEmpty()) {
+            return List.of();
         }
 
-        // 3. 查这个作业的所有提交
+        Assignment assignment = assignmentOptional.get();
+
+        if (assignment.getClassroomId() == null) {
+            return List.of();
+        }
+
+        // 先校验：这个老师是否有权限看这个班的作业
+        Optional<ClassroomTeacher> relationOptional =
+                classroomTeacherRepository.findByClassroomIdAndTeacherUsername(
+                        assignment.getClassroomId(),
+                        teacherUsername
+                );
+
+        if (relationOptional.isEmpty()) {
+            return List.of();
+        }
+
+        // 只查“这个作业所属班级”的学生
+        List<User> students = userRepository.findByClassroomId(assignment.getClassroomId());
+
+        // 查这个作业的所有提交
         List<Submission> submissions = submissionRepository.findByAssignmentId(assignmentId);
 
-        // 4. 方便按 studentName 找 submission
         Map<String, Submission> submissionMap = new HashMap<>();
         for (Submission submission : submissions) {
             submissionMap.put(submission.getStudentName(), submission);
         }
 
-        // 5. 组装状态结果
         List<StudentSubmissionStatus> result = new ArrayList<>();
 
         for (User student : students) {
@@ -136,11 +159,63 @@ public class TeacherController {
         return submissionAnswerRepository.findBySubmissionId(submissionId);
     }
     @GetMapping("/assignments")
-    public List<Assignment> getAssignments() {
-        return assignmentRepository.findAll();
+    public List<Assignment> getAssignments(@RequestParam String teacherUsername) {
+        List<ClassroomTeacher> teacherRelations =
+                classroomTeacherRepository.findByTeacherUsername(teacherUsername);
+
+        if (teacherRelations.isEmpty()) {
+            return List.of();
+        }
+
+        Set<Long> classroomIds = new HashSet<>();
+        for (ClassroomTeacher relation : teacherRelations) {
+            classroomIds.add(relation.getClassroomId());
+        }
+
+        return assignmentRepository.findByClassroomIdInOrderByDueDateAsc(new ArrayList<>(classroomIds));
     }
     @PostMapping("/assignments")
-    public Assignment createAssignment(@RequestBody Assignment assignment) {
+    public Object createAssignment(@RequestBody CreateTeacherAssignmentRequest request) {
+
+        if (request.getTitle() == null || request.getTitle().isBlank()) {
+            return java.util.Map.of("error", "作业标题不能为空");
+        }
+
+        if (request.getBookTitle() == null || request.getBookTitle().isBlank()) {
+            return java.util.Map.of("error", "书名不能为空");
+        }
+
+        if (request.getChapter() == null || request.getChapter().isBlank()) {
+            return java.util.Map.of("error", "章节不能为空");
+        }
+
+        if (request.getDueDate() == null) {
+            return java.util.Map.of("error", "截止日期不能为空");
+        }
+
+        if (request.getClassroomId() == null) {
+            return java.util.Map.of("error", "班级不能为空");
+        }
+
+        if (request.getTeacherUsername() == null || request.getTeacherUsername().isBlank()) {
+            return java.util.Map.of("error", "老师用户名不能为空");
+        }
+
+        Optional<ClassroomTeacher> relation = classroomTeacherRepository
+                .findByClassroomIdAndTeacherUsername(request.getClassroomId(), request.getTeacherUsername());
+
+        if (relation.isEmpty()) {
+            return java.util.Map.of("error", "你没有权限给这个班级创建作业");
+        }
+
+        Assignment assignment = new Assignment(
+                request.getTitle(),
+                request.getBookTitle(),
+                request.getChapter(),
+                request.getDueDate(),
+                request.getClassroomId()
+        );
+
         return assignmentRepository.save(assignment);
     }
     @PostMapping("/assignments/{assignmentId}/questions")

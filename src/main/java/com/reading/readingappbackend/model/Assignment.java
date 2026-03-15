@@ -12,22 +12,26 @@ public class Assignment {
     private String bookTitle;    // 书名，比如“西游记”
     private String chapter;      // 章节描述，比如“第1章 石猴出世”
     private LocalDate dueDate;   // 截止日期
+    private Long classroomId;
 
     public Assignment() {
     }
 
-    public Assignment(Long id, String title, String bookTitle, String chapter, LocalDate dueDate) {
+    public Assignment(Long id, String title, String bookTitle,
+                      String chapter, LocalDate dueDate, Long classroomId) {
         this.id = id;
         this.title = title;
         this.bookTitle = bookTitle;
         this.chapter = chapter;
         this.dueDate = dueDate;
+        this.classroomId = classroomId;
     }
-    public Assignment(String title, String bookTitle, String chapter, LocalDate dueDate) {
+    public Assignment(String title, String bookTitle, String chapter, LocalDate dueDate,Long classroomId) {
         this.title = title;
         this.bookTitle = bookTitle;
         this.chapter = chapter;
         this.dueDate = dueDate;
+        this.classroomId = classroomId;
     }
 
     public Long getId() {
@@ -49,6 +53,9 @@ public class Assignment {
     public String getBookTitle() {
         return bookTitle;
     }
+    public Long getClassroomId() {
+        return classroomId;
+    }
 
     public void setBookTitle(String bookTitle) {
         this.bookTitle = bookTitle;
@@ -68,5 +75,8 @@ public class Assignment {
 
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
+    }
+    public void setClassroomId(Long classroomId) {
+        this.classroomId = classroomId;
     }
 }

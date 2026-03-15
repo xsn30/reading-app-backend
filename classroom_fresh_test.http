@@ -104,3 +104,81 @@ GET http://localhost:8080/teacher/assignments/1/submission-status?teacherUsernam
 
 ### 家长查看孩子学习概览
 GET http://localhost:8080/parent/students/xsn/summary
+###
+GET http://localhost:8080/teacher/assignments?teacherUsername=teacher_demo_20
+###
+GET http://localhost:8080/student/assignments?studentUsername=student_demo_21
+
+###
+GET http://localhost:8080/teacher/assignments?teacherUsername=mhq
+###
+GET http://localhost:8080/student/assignments?studentUsername=xsn
+
+###
+GET http://localhost:8080/classrooms/1/students
+
+###
+GET http://localhost:8080/classrooms/teacher/mhq
+
+###
+GET http://localhost:8080/classrooms/{真实班级id}/students
+
+
+### 查 xsn 这个用户
+GET http://localhost:8080/debug/users/xsn
+###
+GET http://localhost:8080/classrooms/2/students
+
+### 给 mhq 的 2 号班创建作业
+POST http://localhost:8080/teacher/assignments
+Content-Type: application/json
+
+{
+  "title": "阅读《红楼梦》第1回并完成练习题",
+  "bookTitle": "红楼梦",
+  "chapter": "第1回 甄士隐梦幻识通灵",
+  "dueDate": "2026-03-20",
+  "classroomId": 2,
+  "teacherUsername": "mhq"
+}
+### 查 mhq 能看到的作业
+GET http://localhost:8080/teacher/assignments?teacherUsername=mhq
+###
+GET http://localhost:8080/student/assignments?studentUsername=xsn
+
+###
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "parent_demo_10",
+  "password": "123456",
+  "role": "parent"
+}
+###
+POST http://localhost:8080/parent/link-student
+Content-Type: application/json
+
+{
+  "parentUsername": "parent_demo_10",
+  "studentUsername": "xsn"
+}
+###
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "student_demo_100",
+  "password": "123456",
+  "role": "student"
+}
+###
+POST http://localhost:8080/parent/link-student
+Content-Type: application/json
+
+{
+  "parentUsername": "parent_demo_10",
+  "studentUsername": "student_demo_100"
+}
+###
+GET http://localhost:8080/parent/parent_demo_10/children

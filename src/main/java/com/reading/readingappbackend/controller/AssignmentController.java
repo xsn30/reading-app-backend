@@ -18,6 +18,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import com.reading.readingappbackend.repository.AssignmentRepository;
+import java.util.Optional;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -27,12 +29,15 @@ public class AssignmentController {
     private final AssignmentService assignmentService;
     private final QuestionService questionService;
     private final SubmissionService submissionService;
+    private final AssignmentRepository assignmentRepository;
     public AssignmentController(AssignmentService assignmentService,
                                 QuestionService questionService,
-                                SubmissionService submissionService) {
+                                SubmissionService submissionService,
+                                AssignmentRepository assignmentRepository) {
         this.assignmentService = assignmentService;
         this.questionService = questionService;
         this.submissionService = submissionService;
+        this.assignmentRepository = assignmentRepository;
     }
 
     @GetMapping("/assignments")
@@ -58,8 +63,21 @@ public class AssignmentController {
         return assignmentService.createAssignment(assignment);
     }
     @PostMapping("/assignments/{id}/submit")
-    public SubmissionResult submitAssignment(@PathVariable Long id,
-                                             @RequestBody SubmissionRequest request) {
+    public Object submitAssignment(@PathVariable Long id,
+                                   @RequestBody SubmissionRequest request) {
+
+        Optional<Assignment> assignmentOptional = assignmentRepository.findById(id);
+
+        if (assignmentOptional.isEmpty()) {
+            return java.util.Map.of("error", "作业不存在");
+        }
+
+        Assignment assignment = assignmentOptional.get();
+
+        if (assignment.getDueDate() != null && java.time.LocalDate.now().isAfter(assignment.getDueDate())) {
+            return java.util.Map.of("error", "作业已截止，不能再提交");
+        }
+
         return submissionService.gradeAssignment(
                 id,
                 request.getStudentName(),

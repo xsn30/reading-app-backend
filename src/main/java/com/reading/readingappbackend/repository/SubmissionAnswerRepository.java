@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface SubmissionAnswerRepository extends JpaRepository<SubmissionAnswer, Long> {
     List<SubmissionAnswer> findBySubmissionId(Long submissionId);
+    void deleteBySubmissionId(Long submissionId);
 }
