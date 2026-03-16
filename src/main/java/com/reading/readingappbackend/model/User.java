@@ -16,6 +16,11 @@ public class User {
     private String linkedStudentUsername;
     private Long classroomId;
 
+    private String displayName;
+    private String email;
+    private String phone;
+    private String birthday;
+
     public User() {
     }
 
@@ -41,7 +46,30 @@ public class User {
     public String getRole() {
         return role;
     }
-    public String getLinkedStudentUsername() { return linkedStudentUsername; }
+
+    public String getLinkedStudentUsername() {
+        return linkedStudentUsername;
+    }
+
+    public Long getClassroomId() {
+        return classroomId;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getBirthday() {
+        return birthday;
+    }
 
     public void setId(Long id) {
         this.id = id;
@@ -58,14 +86,28 @@ public class User {
     public void setRole(String role) {
         this.role = role;
     }
+
     public void setLinkedStudentUsername(String linkedStudentUsername) {
         this.linkedStudentUsername = linkedStudentUsername;
-    }
-    public Long getClassroomId() {
-        return classroomId;
     }
 
     public void setClassroomId(Long classroomId) {
         this.classroomId = classroomId;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
     }
 }

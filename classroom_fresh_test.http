@@ -182,3 +182,21 @@ Content-Type: application/json
 }
 ###
 GET http://localhost:8080/parent/parent_demo_10/children
+
+###
+GET http://localhost:8080/student/profile?username=xsn
+###
+GET http://localhost:8080/student/profile?username=xsn
+###
+PUT http://localhost:8080/student/profile
+Content-Type: application/json
+
+{
+  "username": "xsn",
+  "displayName": "许珊宁",
+  "email": "xsn@test.com",
+  "phone": "123456789",
+  "birthday": "2003-08-15"
+}
+###
+GET http://localhost:8080/teacher/profile?username=mhq

@@ -157,4 +157,82 @@ public class ParentController {
 
         return result;
     }
+    @GetMapping("/profile")
+    public Object getParentProfile(@RequestParam String username) {
+        Optional<User> parentOptional = userRepository.findByUsername(username);
+
+        if (parentOptional.isEmpty()) {
+            return Map.of("error", "家长不存在");
+        }
+
+        User parent = parentOptional.get();
+
+        if (!"parent".equals(parent.getRole())) {
+            return Map.of("error", "该账号不是家长");
+        }
+
+        List<ParentStudentLink> links =
+                parentStudentLinkRepository.findByParentUsername(username);
+
+        List<Map<String, Object>> children = new ArrayList<>();
+
+        for (ParentStudentLink link : links) {
+            Optional<User> studentOptional =
+                    userRepository.findByUsername(link.getStudentUsername());
+
+            if (studentOptional.isPresent()) {
+                User student = studentOptional.get();
+
+                Map<String, Object> child = new LinkedHashMap<>();
+                child.put("id", student.getId());
+                child.put("username", student.getUsername());
+
+                children.add(child);
+            }
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("username", parent.getUsername());
+        result.put("role", parent.getRole());
+        result.put("displayName", parent.getDisplayName());
+        result.put("email", parent.getEmail());
+        result.put("phone", parent.getPhone());
+        result.put("birthday", parent.getBirthday());
+        result.put("children", children);
+
+        return result;
+    }
+    @PutMapping("/profile")
+    public Object updateParentProfile(@RequestBody Map<String, String> request) {
+
+        String username = request.get("username");
+
+        if (username == null || username.isBlank()) {
+            return Map.of("error", "username不能为空");
+        }
+
+        Optional<User> parentOptional = userRepository.findByUsername(username);
+
+        if (parentOptional.isEmpty()) {
+            return Map.of("error", "家长不存在");
+        }
+
+        User parent = parentOptional.get();
+
+        if (!"parent".equals(parent.getRole())) {
+            return Map.of("error", "该账号不是家长");
+        }
+
+        parent.setDisplayName(request.get("displayName"));
+        parent.setEmail(request.get("email"));
+        parent.setPhone(request.get("phone"));
+        parent.setBirthday(request.get("birthday"));
+
+        userRepository.save(parent);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("message", "资料更新成功");
+
+        return result;
+    }
 }

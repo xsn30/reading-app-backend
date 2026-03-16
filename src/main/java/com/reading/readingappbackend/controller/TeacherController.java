@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -232,5 +233,88 @@ public class TeacherController {
         }
 
         return questionRepository.save(question);
+    }
+    @GetMapping("/profile")
+    public Object getTeacherProfile(@RequestParam String username) {
+        Optional<User> teacherOptional = userRepository.findByUsername(username);
+
+        if (teacherOptional.isEmpty()) {
+            return Map.of("error", "老师不存在");
+        }
+
+        User teacher = teacherOptional.get();
+
+        if (!"teacher".equals(teacher.getRole())) {
+            return Map.of("error", "该账号不是老师");
+        }
+
+        List<ClassroomTeacher> relations =
+                classroomTeacherRepository.findByTeacherUsername(username);
+
+        List<Map<String, Object>> classrooms = new ArrayList<>();
+
+        for (ClassroomTeacher relation : relations) {
+            Optional<Classroom> classroomOptional =
+                    classroomRepository.findById(relation.getClassroomId());
+
+            if (classroomOptional.isPresent()) {
+                Classroom classroom = classroomOptional.get();
+
+                Map<String, Object> classroomMap = new LinkedHashMap<>();
+                classroomMap.put("id", classroom.getId());
+                classroomMap.put("name", classroom.getName());
+
+                classrooms.add(classroomMap);
+            }
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("username", teacher.getUsername());
+        result.put("role", teacher.getRole());
+        result.put("displayName", teacher.getDisplayName());
+        result.put("email", teacher.getEmail());
+        result.put("phone", teacher.getPhone());
+        result.put("birthday", teacher.getBirthday());
+        result.put("classroomCount", classrooms.size());
+        result.put("classrooms", classrooms);
+
+        return result;
+    }
+    @PutMapping("/profile")
+    public Object updateTeacherProfile(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+
+        if (username == null || username.isBlank()) {
+            return Map.of("error", "username 不能为空");
+        }
+
+        Optional<User> teacherOptional = userRepository.findByUsername(username);
+
+        if (teacherOptional.isEmpty()) {
+            return Map.of("error", "老师不存在");
+        }
+
+        User teacher = teacherOptional.get();
+
+        if (!"teacher".equals(teacher.getRole())) {
+            return Map.of("error", "该账号不是老师");
+        }
+
+        teacher.setDisplayName(request.get("displayName"));
+        teacher.setEmail(request.get("email"));
+        teacher.setPhone(request.get("phone"));
+        teacher.setBirthday(request.get("birthday"));
+
+        userRepository.save(teacher);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("message", "资料更新成功");
+        result.put("username", teacher.getUsername());
+        result.put("displayName", teacher.getDisplayName());
+        result.put("email", teacher.getEmail());
+        result.put("phone", teacher.getPhone());
+        result.put("birthday", teacher.getBirthday());
+
+        return result;
     }
 }
