@@ -6,15 +6,17 @@ public class LoginResponse {
     private String username;
     private String role;
     private String linkedStudentUsername;
+    private String phone;
 
     public LoginResponse() {
     }
 
-    public LoginResponse(Long id, String username, String role, String linkedStudentUsername) {
+    public LoginResponse(Long id, String username, String role, String linkedStudentUsername, String phone) {
         this.id = id;
         this.username = username;
         this.role = role;
         this.linkedStudentUsername = linkedStudentUsername;
+        this.phone = phone;
     }
 
     public Long getId() {
@@ -45,5 +47,12 @@ public class LoginResponse {
     }
     public void setLinkedStudentUsername(String linkedStudentUsername) {
         this.linkedStudentUsername = linkedStudentUsername;
+    }
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }

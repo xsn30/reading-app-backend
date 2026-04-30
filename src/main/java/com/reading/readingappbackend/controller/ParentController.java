@@ -13,6 +13,9 @@ import com.reading.readingappbackend.model.ParentStudentLink;
 import com.reading.readingappbackend.model.User;
 import com.reading.readingappbackend.repository.ParentStudentLinkRepository;
 import com.reading.readingappbackend.repository.UserRepository;
+import com.reading.readingappbackend.model.Assignment;
+import com.reading.readingappbackend.model.AssignmentTrendItem;
+import com.reading.readingappbackend.repository.AssignmentRepository;
 
 import java.util.*;
 
@@ -25,15 +28,18 @@ public class ParentController {
     private final SubmissionAnswerRepository submissionAnswerRepository;
     private final ParentStudentLinkRepository parentStudentLinkRepository;
     private final UserRepository userRepository;
+    private final AssignmentRepository assignmentRepository;
 
     public ParentController(SubmissionRepository submissionRepository,
                             SubmissionAnswerRepository submissionAnswerRepository,
                             ParentStudentLinkRepository parentStudentLinkRepository,
-                            UserRepository userRepository) {
+                            UserRepository userRepository,
+                            AssignmentRepository assignmentRepository) {
         this.submissionRepository = submissionRepository;
         this.submissionAnswerRepository = submissionAnswerRepository;
         this.parentStudentLinkRepository = parentStudentLinkRepository;
         this.userRepository = userRepository;
+        this.assignmentRepository = assignmentRepository;
     }
 
     @GetMapping("/students/{studentName}/submissions")
@@ -51,32 +57,83 @@ public class ParentController {
                 submissionRepository.findByStudentNameOrderBySubmittedAtDesc(studentUsername);
 
         if (submissions.isEmpty()) {
-            return new ParentLearningSummary(0, 0.0, null, null, null);
+            return new ParentLearningSummary(
+                    0,
+                    0.0,
+                    null,
+                    null,
+                    null,
+                    List.of()
+            );
         }
 
-        // 每个作业只保留“最后一次提交”
-        Map<Long, Submission> latestByAssignment = new LinkedHashMap<>();
+        Map<Long, Submission> bestByAssignment = new LinkedHashMap<>();
 
         for (Submission submission : submissions) {
             Long assignmentId = submission.getAssignmentId();
 
-            // 因为 submissions 已经按 submittedAt DESC 排序，
-            // 所以第一次放进去的就是这个作业最新的一次提交
-            if (!latestByAssignment.containsKey(assignmentId)) {
-                latestByAssignment.put(assignmentId, submission);
+            Submission currentBest = bestByAssignment.get(assignmentId);
+
+            if (currentBest == null) {
+                bestByAssignment.put(assignmentId, submission);
+            } else {
+                double currentRate = currentBest.getMaxScore() == 0
+                        ? 0.0
+                        : (double) currentBest.getTotalScore() / currentBest.getMaxScore();
+
+                double newRate = submission.getMaxScore() == 0
+                        ? 0.0
+                        : (double) submission.getTotalScore() / submission.getMaxScore();
+
+                if (newRate > currentRate) {
+                    bestByAssignment.put(assignmentId, submission);
+                }
             }
         }
 
-        List<Submission> effectiveSubmissions = new ArrayList<>(latestByAssignment.values());
+        List<Submission> effectiveSubmissions = new ArrayList<>(bestByAssignment.values());
 
         int totalAssignments = effectiveSubmissions.size();
 
         double averageScore = effectiveSubmissions.stream()
-                .mapToInt(Submission::getTotalScore)
+                .mapToDouble(submission -> {
+                    if (submission.getMaxScore() == 0) {
+                        return 0.0;
+                    }
+                    return ((double) submission.getTotalScore() / submission.getMaxScore()) * 100;
+                })
                 .average()
                 .orElse(0.0);
 
-        // 最近一次提交仍然按所有 submission 里最新的那条
+        List<AssignmentTrendItem> assignmentTrend = new ArrayList<>();
+
+        for (Submission submission : effectiveSubmissions) {
+            Long assignmentId = submission.getAssignmentId();
+
+            String assignmentTitle = "作业 " + assignmentId;
+
+            Optional<Assignment> assignmentOptional = assignmentRepository.findById(assignmentId);
+            if (assignmentOptional.isPresent()) {
+                assignmentTitle = assignmentOptional.get().getTitle();
+            }
+
+            double scoreRate = submission.getMaxScore() == 0
+                    ? 0.0
+                    : ((double) submission.getTotalScore() / submission.getMaxScore()) * 100;
+
+            assignmentTrend.add(new AssignmentTrendItem(
+                    assignmentId,
+                    assignmentTitle,
+                    submission.getTotalScore(),
+                    submission.getMaxScore(),
+                    scoreRate
+            ));
+        }
+
+        // 为了折线图更自然：按作业ID从小到大显示
+        assignmentTrend.sort(Comparator.comparing(AssignmentTrendItem::getAssignmentId));
+
+        // 最近一次提交仍然用所有提交里最新的那条
         Submission latest = submissions.get(0);
 
         return new ParentLearningSummary(
@@ -84,7 +141,8 @@ public class ParentController {
                 averageScore,
                 latest.getTotalScore(),
                 latest.getMaxScore(),
-                latest.getSubmittedAt()
+                latest.getSubmittedAt(),
+                assignmentTrend
         );
     }
     @PostMapping("/link-student")

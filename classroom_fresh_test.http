@@ -200,3 +200,86 @@ Content-Type: application/json
 }
 ###
 GET http://localhost:8080/teacher/profile?username=mhq
+
+POST http://localhost:8080/auth/send-sms-code
+Content-Type: application/json
+
+{
+  "username": "xsn",
+  "phone": "12345678910"
+}
+
+GET http://localhost:8080/teacher/profile?username=mhq
+
+###
+
+POST http://localhost:8080/auth/send-sms-code
+Content-Type: application/json
+
+{
+  "username": "xsn",
+  "phone": "12345678910"
+}
+###
+POST http://localhost:8080/auth/login-by-sms
+Content-Type: application/json
+
+{
+"username": "xsn",
+"phone": "12345678910",
+"code": "448012"
+}
+###
+POST http://localhost:8080/auth/login-by-sms
+Content-Type: application/json
+
+{
+  "username": "xsn",
+  "phone": "12345678910",
+  "code": "448012"
+}
+###
+POST http://localhost:8080/auth/send-sms-code
+Content-Type: application/json
+
+{
+"username": "xsn",
+"phone": "12345678910"
+}
+###
+POST http://localhost:8080/auth/login-by-sms
+Content-Type: application/json
+
+{
+  "username": "xsn",
+  "phone": "12345678910",
+  "code": "769203"
+}
+###
+POST http://localhost:8080/auth/reset-password-by-sms
+Content-Type: application/json
+
+{
+  "username": "xsn",
+  "phone": "12345678910",
+  "code": "769203",
+  "newPassword": "999999"
+}
+###
+POST http://localhost:8080/auth/send-sms-code
+Content-Type: application/json
+
+{
+  "username": "xsn",
+  "phone": "12345678910"
+}
+###
+POST http://localhost:8080/auth/reset-password-by-sms
+Content-Type: application/json
+
+{
+  "username": "xsn",
+  "phone": "12345678910",
+  "code": "342408",
+  "newPassword": "999999"
+}

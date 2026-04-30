@@ -1,6 +1,7 @@
 package com.reading.readingappbackend.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ParentLearningSummary {
 
@@ -9,6 +10,7 @@ public class ParentLearningSummary {
     private Integer latestScore;
     private Integer latestMaxScore;
     private LocalDateTime latestSubmittedAt;
+    private List<AssignmentTrendItem> assignmentTrend;
 
     public ParentLearningSummary() {
     }
@@ -17,12 +19,14 @@ public class ParentLearningSummary {
                                  double averageScore,
                                  Integer latestScore,
                                  Integer latestMaxScore,
-                                 LocalDateTime latestSubmittedAt) {
+                                 LocalDateTime latestSubmittedAt,
+                                 List<AssignmentTrendItem> assignmentTrend) {
         this.totalSubmissions = totalSubmissions;
         this.averageScore = averageScore;
         this.latestScore = latestScore;
         this.latestMaxScore = latestMaxScore;
         this.latestSubmittedAt = latestSubmittedAt;
+        this.assignmentTrend = assignmentTrend;
     }
 
     public int getTotalSubmissions() {
@@ -63,5 +67,13 @@ public class ParentLearningSummary {
 
     public void setLatestSubmittedAt(LocalDateTime latestSubmittedAt) {
         this.latestSubmittedAt = latestSubmittedAt;
+    }
+
+    public List<AssignmentTrendItem> getAssignmentTrend() {
+        return assignmentTrend;
+    }
+
+    public void setAssignmentTrend(List<AssignmentTrendItem> assignmentTrend) {
+        this.assignmentTrend = assignmentTrend;
     }
 }

@@ -2,21 +2,14 @@ package com.reading.readingappbackend.model;
 
 public class RegisterRequest {
 
-    private String username;
     private String password;
     private String role;
     private String linkedStudentUsername;
+    private String phone;
 
     public RegisterRequest() {
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     public String getPassword() {
         return password;
@@ -39,5 +32,12 @@ public class RegisterRequest {
 
     public void setLinkedStudentUsername(String linkedStudentUsername) {
         this.linkedStudentUsername = linkedStudentUsername;
+    }
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }
